@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapay Zeka ve Mesleklerin Geleceği</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Tech -->
+    <!-- Application Structure Plan: The SPA is designed around the central theme of "Risk vs. Opportunity". It starts with a high-level overview (hero section and key stats dashboard), allows deep exploration through an interactive job explorer with search/filter capabilities, and provides actionable advice in the "Skills" and "Strategies" sections. This non-linear, task-oriented structure was chosen over a linear report format to empower users to quickly find information relevant to them, enhancing engagement and understanding. -->
+    <!-- Visualization & Content Choices: 1. Report Info: OECD vs. Turkey automation risk. Goal: Compare. Viz: Horizontal Bar Chart (Chart.js). Interaction: Tooltip on hover. Justification: Clear, direct comparison of two data points. 2. Report Info: 40 at-risk and 40 promising jobs. Goal: Organize & Explore. Viz: Interactive filterable cards in a grid. Interaction: Live search, category filtering, click-to-reveal details. Justification: More engaging and user-friendly than static tables. 3. Report Info: Key statistics (job creation, GDP impact). Goal: Inform. Viz: "Stat Cards" with large numbers. Justification: Scannable and impactful dashboard pattern. 4. Report Info: Adaptation strategies. Goal: Organize. Viz: Accordion. Justification: Presents dense information cleanly without clutter. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 350px;
+            }
+        }
+        .nav-button.active {
+            background-color: #333333;
+            color: #FFFFFF;
+        }
+        .job-card {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .details.open {
+            max-height: 500px;
+            transition: max-height 0.5s ease-in;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">Yapay Zeka ve Mesleklerin Geleceği</h1>
+                <nav class="hidden md:flex space-x-4">
+                    <a href="#overview" class="text-gray-600 hover:text-gray-900">Genel Bakış</a>
+                    <a href="#explorer" class="text-gray-600 hover:text-gray-900">Meslek Kaşifi</a>
+                    <a href="#skills" class="text-gray-600 hover:text-gray-900">Geleceğin Yetkinlikleri</a>
+                    <a href="#strategies" class="text-gray-600 hover:text-gray-900">Uyum Stratejileri</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="hero" class="text-center py-12">
+            <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900">İş Gücünde Yeni Bir Çağ Başlıyor</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Yapay zeka, meslekleri yok etmekten ziyade dönüştürüyor. Bu interaktif rapor, YZ'nin iş dünyasındaki etkilerini, risk altındaki ve geleceği parlak meslekleri ve bu dönüşüme nasıl uyum sağlayabileceğinizi anlamanız için tasarlandı.</p>
+        </section>
+
+        <section id="overview" class="py-12">
+            <h3 class="text-3xl font-bold text-center mb-10">Bir Bakışta Yapay Zeka Etkisi</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="text-5xl font-bold text-blue-600">78 Milyon</div>
+                    <p class="mt-2 text-gray-700 font-medium">Net Yeni İstihdam</p>
+                    <p class="text-sm text-gray-500 mt-1">(WEF 2025 projeksiyonu)</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="text-5xl font-bold text-blue-600">%5</div>
+                    <p class="mt-2 text-gray-700 font-medium">Türkiye GSYİH Potansiyel Artışı</p>
+                    <p class="text-sm text-gray-500 mt-1">(Erken benimseme ile)</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="text-5xl font-bold text-blue-600">%55</div>
+                    <p class="mt-2 text-gray-700 font-medium">Türkiye'de YZ ile Çalışacak İş Oranı</p>
+                    <p class="text-sm text-gray-500 mt-1">(İnsan-YZ işbirliği)</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="text-5xl font-bold text-blue-600">%44</div>
+                    <p class="mt-2 text-gray-700 font-medium">Türkiye'de Değişecek Yetkinlik Oranı</p>
+                    <p class="text-sm text-gray-500 mt-1">(2030'a kadar)</p>
+                </div>
+            </div>
+            <div class="mt-12 bg-white p-6 rounded-xl shadow-md">
+                <h4 class="text-xl font-bold text-center mb-4">Otomasyon Riski Altındaki İşlerin Oranı</h4>
+                <p class="text-center text-gray-600 mb-6">OECD'nin küresel ortalaması ile Türkiye için yapılan tahminler arasındaki fark, YZ etkisinin yerel dinamiklere göre değişebileceğini göstermektedir.</p>
+                <div class="chart-container">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="explorer" class="py-12">
+            <h3 class="text-3xl font-bold text-center mb-4">İnteraktif Meslek Kaşifi</h3>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10">Aşağıdaki sekmelerden seçim yaparak geleceği risk altında olan veya parlayan meslekleri keşfedin. Arama çubuğunu kullanarak veya kategorilere göre filtreleyerek ilgilendiğiniz meslekleri kolayca bulun.</p>
+            
+            <div class="flex justify-center mb-8">
+                <div class="flex space-x-1 bg-gray-200 p-1 rounded-xl">
+                    <button id="risk-tab" class="nav-button px-4 py-2 text-sm font-medium rounded-lg">Risk Altındaki Meslekler</button>
+                    <button id="safe-tab" class="nav-button px-4 py-2 text-sm font-medium rounded-lg">Geleceği Parlak Meslekler</button>
+                </div>
+            </div>
+
+            <div class="mb-8 max-w-4xl mx-auto">
+                <input type="text" id="search-input" placeholder="Meslek ara..." class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            </div>
+            
+            <div id="category-filters" class="flex flex-wrap justify-center gap-2 mb-10"></div>
+            
+            <div id="jobs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            </div>
+        </section>
+
+        <section id="skills" class="py-12 bg-white rounded-2xl shadow-lg">
+            <h3 class="text-3xl font-bold text-center mb-10">Geleceğin Yetkinlikleri</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <div class="p-6">
+                    <h4 class="text-2xl font-semibold mb-4 text-center text-blue-700">🚀 Teknik Yetkinlikler</h4>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">✓</span><span><b>Yapay Zeka ve Makine Öğrenmesi:</b> Algoritmaları anlama, geliştirme ve uygulama.</span></li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">✓</span><span><b>Büyük Veri Analizi:</b> Veriden anlamlı sonuçlar çıkarma ve strateji geliştirme.</span></li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">✓</span><span><b>Siber Güvenlik:</b> Dijital sistemleri ve verileri koruma.</span></li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">✓</span><span><b>Yazılım Geliştirme:</b> Yeni nesil uygulamalar ve platformlar oluşturma.</span></li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">✓</span><span><b>Robotik ve Otomasyon:</b> Fiziksel ve dijital süreçleri otomatikleştirme.</span></li>
+                    </ul>
+                </div>
+                <div class="p-6">
+                    <h4 class="text-2xl font-semibold mb-4 text-center text-amber-600">🧠 İnsani Yetkinlikler</h4>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="text-amber-500 mr-3 mt-1">✓</span><span><b>Eleştirel Düşünme ve Analiz:</b> Karmaşık sorunları anlama ve çözme.</span></li>
+                        <li class="flex items-start"><span class="text-amber-500 mr-3 mt-1">✓</span><span><b>Yaratıcılık ve Orijinallik:</b> Yeni fikirler ve çözümler üretme.</span></li>
+                        <li class="flex items-start"><span class="text-amber-500 mr-3 mt-1">✓</span><span><b>Liderlik ve Sosyal Etki:</b> İnsanları yönetme ve motive etme.</span></li>
+                        <li class="flex items-start"><span class="text-amber-500 mr-3 mt-1">✓</span><span><b>Duygusal Zeka ve Empati:</b> İnsanlarla derin bağ kurma ve anlama.</span></li>
+                        <li class="flex items-start"><span class="text-amber-500 mr-3 mt-1">✓</span><span><b>Yaşam Boyu Öğrenme ve Uyum Yeteneği:</b> Sürekli değişime adapte olma.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategies" class="py-12">
+            <h3 class="text-3xl font-bold text-center mb-10">Dönüşüme Uyum Stratejileri</h3>
+            <div class="max-w-4xl mx-auto space-y-4" id="accordion-container">
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
+            <p>&copy; 2024 Yapay Zeka ve Mesleklerin Geleceği Raporu.</p>
+            <p class="text-sm text-gray-400 mt-1">Bu interaktif rapor, OECD, WEF ve diğer kaynaklardan derlenen bilgilere dayanmaktadır.</p>
+        </div>
+    </footer>
+
+    <script>
+        const jobsData = {
+            risk: [
+                { name: "Telefonla Satış Görevlisi", reason: "Rutin, tekrarlayan iletişim ve senaryo tabanlı satış süreçleri.", category: "Satış & Müşteri Hizmetleri" },
+                { name: "Daktilo veya İlgili Klavye Çalışanı", reason: "Rutin veri girişi, metin yazımı ve büro işleri.", category: "İdari & Veri Girişi" },
+                { name: "Hukuk Sekreteri", reason: "Rutin doküman yönetimi, kural tabanlı yasal işlemlerin otomasyonu.", category: "İdari & Veri Girişi" },
+                { name: "Mali Hesaplar Yöneticisi", reason: "Rutin denetim, veri analizi ve işlem takibinin otomatikleşmesi.", category: "Finans & Muhasebe" },
+                { name: "Rutin Denetçi ve Test Uzmanı", reason: "Tekrarlayan kontrol süreçleri ve kural tabanlı analizlerin YZ tarafından yapılması.", category: "Teknik & Kalite Kontrol" },
+                { name: "Veri Girişi Personeli", reason: "Yüksek hacimli, tekrarlayan veri işleme görevleri.", category: "İdari & Veri Girişi" },
+                { name: "Büro İşleri Personeli", reason: "Genel idari ve tekrarlayan büro görevleri.", category: "İdari & Veri Girişi" },
+                { name: "Kasiyerler", reason: "Tekrarlayan ödeme işlemleri ve ürün tarama görevleri.", category: "Satış & Müşteri Hizmetleri" },
+                { name: "Posta Hizmet Memurları", reason: "Rutin dağıtım, sınıflandırma ve lojistik görevleri.", category: "Lojistik & Ulaşım" },
+                { name: "Taşımacılık Sürücüleri", reason: "Sürücüsüz araç teknolojilerinin gelişimi.", category: "Lojistik & Ulaşım" },
+                { name: "Lojistik Personeli", reason: "Rutin planlama, takip ve envanter yönetiminin otomasyonu.", category: "Lojistik & Ulaşım" },
+                { name: "Radyolog", reason: "Tıbbi görüntü analizi ve rutin teşhis görevlerinin YZ tarafından desteklenmesi/üstlenilmesi.", category: "Sağlık" },
+                { name: "Patolog", reason: "Hastalık teşhisi ve rutin tarama görevlerinin YZ tarafından desteklenmesi/üstlenilmesi.", category: "Sağlık" },
+                { name: "Tercümanlar", reason: "Dil çevirisi ve metin oluşturma yeteneklerinin YZ'de gelişmesi.", category: "Dil & İçerik" },
+                { name: "Tarihçiler (Rutin Araştırma)", reason: "Büyük veri analizi ve metin oluşturma yeteneklerinin YZ'de gelişmesi.", category: "Dil & İçerik" },
+                { name: "Satış Temsilcileri (Tekrarlayan)", reason: "Tekrarlayan müşteri iletişimi ve bilgi verme görevleri.", category: "Satış & Müşteri Hizmetleri" },
+                { name: "Yazarlar (Rutin İçerik)", reason: "Metin oluşturma ve içerik üretimi yeteneklerinin YZ'de gelişmesi.", category: "Dil & İçerik" },
+                { name: "Müşteri Hizmetleri Temsilcileri", reason: "Rutin sorgulara yanıt verme ve bilgi sağlama görevleri.", category: "Satış & Müşteri Hizmetleri" },
+                { name: "Gazeteciler (Rutin Haber)", reason: "Haber yazımı ve içerik üretimi yeteneklerinin YZ'de gelişmesi.", category: "Dil & İçerik" },
+                { name: "Fabrika İşçileri (Tekrarlayan)", reason: "Tekrarlayan üretim görevlerinin robotlar tarafından yapılması.", category: "Üretim" },
+                { name: "Yazılım Mühendisleri (Rutin Kodlama)", reason: "Rutin kodlama, hata ayıklama ve test etme görevlerinin otomasyonu.", category: "Teknoloji" },
+                { name: "Yatırım Uzmanları (Rutin Tavsiye)", reason: "Veri analizi ve rutin yatırım tavsiyelerinin YZ tarafından sunulması.", category: "Finans & Muhasebe" },
+                { name: "Hukuk Alanındaki Rutin Roller", reason: "Belge inceleme, sözleşme taslağı oluşturma gibi kural tabanlı görevler.", category: "Hukuk" },
+                { name: "Yayıncılık Alanındaki Rutin Roller", reason: "Metin düzenleme, içerik seçimi ve sayfa düzeni gibi görevler.", category: "Dil & İçerik" },
+                { name: "Grafik Tasarımcıları (Şablon Tabanlı)", reason: "Şablon tabanlı ve rutin tasarım görevlerinin YZ ile otomasyonu.", category: "Tasarım" },
+                { name: "Eğitim Sektöründeki Rutin Roller", reason: "Notlandırma, standart içerik sunumu ve idari görevler.", category: "Eğitim" },
+                { name: "Güvenlik Sektöründeki Rutin Roller", reason: "Kamera izleme, alarm yanıtı ve rutin güvenlik protokolleri.", category: "Güvenlik" },
+                { name: "Muhasebeciler", reason: "Finansal kayıt tutma, vergi beyannamesi hazırlama gibi rutin denetimler.", category: "Finans & Muhasebe" },
+                { name: "Banka Memurları", reason: "Hesap açma, para yatırma/çekme gibi rutin bankacılık işlemleri.", category: "Finans & Muhasebe" },
+                { name: "Çiftçilik İşçileri (Rutin Tarım)", reason: "Tekrarlayan ekim, hasat ve bakım görevleri.", category: "Tarım & Doğa" },
+                { name: "Balıkçılık İşçileri (Rutin Görevler)", reason: "Tekrarlayan balıkçılık ve işleme görevleri.", category: "Tarım & Doğa" },
+                { name: "Ormancılık İşçileri (Rutin Görevler)", reason: "Tekrarlayan ağaç kesme, dikim ve bakım görevleri.", category: "Tarım & Doğa" },
+                { name: "İnşaat İşçileri (Tekrarlayan Manuel)", reason: "Özellikle tekrarlayan ve manuel inşaat görevleri.", category: "İnşaat" },
+                { name: "Çağrı Merkezi Çalışanları", reason: "Tekrarlayan çağrı yanıtlama ve standart sorun giderme.", category: "Satış & Müşteri Hizmetleri" },
+                { name: "Sekreterler", reason: "Rutin yazışma, randevu yönetimi ve ofis organizasyonu.", category: "İdari & Veri Girişi" },
+                { name: "Kütüphaneciler (Rutin Kataloglama)", reason: "Rutin kataloglama, ödünç verme ve bilgi erişim görevleri.", category: "Eğitim" },
+                { name: "Muhasebe Asistanları", reason: "Rutin defter tutma, fatura işleme ve bordro hazırlama.", category: "Finans & Muhasebe" },
+                { name: "Pazarlama Asistanları (Rutin Kampanya)", reason: "Rutin kampanya yönetimi, veri girişi ve raporlama.", category: "Satış & Müşteri Hizmetleri" },
+                { name: "Rezervasyon Görevlileri", reason: "Tekrarlayan rezervasyon işlemleri ve programlama.", category: "İdari & Veri Girişi" },
+                { name: "Göz Hastalıkları Tıbbi Teknisyenleri", reason: "Rutin göz muayeneleri ve veri girişi.", category: "Sağlık" }
+            ],
+            safe: [
+                { name: "Yapay Zeka ve Makine Öğrenimi Uzmanı", reason: "YZ sistemleri geliştirme, optimize etme ve uygulama.", category: "Yapay Zeka & Veri" },
+                { name: "Sürdürülebilirlik Uzmanı", reason: "Çevre ve sosyal etki yönetimi, YZ ile entegrasyon ve yeşil teknolojiler.", category: "Yeşil Ekonomi" },
+                { name: "Fintech Mühendisi", reason: "Finansal teknolojilerde YZ uygulamaları geliştirme ve entegrasyon.", category: "Mühendislik & Teknoloji" },
+                { name: "Robotik Mühendisi", reason: "Robot tasarımı, geliştirme, otomasyon ve insan-robot etkileşimi.", category: "Mühendislik & Teknoloji" },
+                { name: "Siber Güvenlik Uzmanı", reason: "Veri ve sistem güvenliği, YZ destekli tehdit analizi ve koruma.", category: "Yapay Zeka & Veri" },
+                { name: "Büyük Veri Uzmanı/Analisti/Mühendisi", reason: "Büyük veri analizi, modelleme, altyapı yönetimi ve stratejik karar desteği.", category: "Yapay Zeka & Veri" },
+                { name: "Yazılım ve Uygulama Geliştirici", reason: "Yeni YZ tabanlı uygulamalar ve platformlar tasarlama ve kodlama.", category: "Mühendislik & Teknoloji" },
+                { name: "Nesnelerin İnterneti (IoT) Uzmanı", reason: "Bağlı cihaz sistemleri geliştirme, entegrasyon ve veri yönetimi.", category: "Mühendislik & Teknoloji" },
+                { name: "Otonom ve Elektrikli Araç Uzmanı", reason: "Gelişen otomotiv teknolojileri, yazılım ve donanım entegrasyonu.", category: "Mühendislik & Teknoloji" },
+                { name: "UI ve UX Tasarımcısı", reason: "Kullanıcı deneyimi ve arayüz tasarımı, YZ destekli kişiselleştirme.", category: "Tasarım & Yaratıcılık" },
+                { name: "Yapay Zeka Eğitmeni", reason: "YZ modellerini eğitme, optimize etme ve performansını artırma.", category: "Yapay Zeka & Veri" },
+                { name: "İş Zekası Analisti", reason: "İş süreçleri için veri tabanlı kararlar alma ve stratejik analiz.", category: "Yapay Zeka & Veri" },
+                { name: "Dijital Dönüşüm Uzmanı", reason: "Şirketlerin teknolojik adaptasyonuna rehberlik etme ve süreçleri optimize etme.", category: "Strateji & Yönetim" },
+                { name: "Elektroteknoloji Mühendisi", reason: "YZ entegre sistemlerin donanım-yazılım entegrasyonu ve enerji yönetimi.", category: "Mühendislik & Teknoloji" },
+                { name: "Tarım Ekipmanı Operatörü", reason: "YZ destekli hassas tarım makineleri kullanımı ve yönetimi.", category: "Fiziksel & Operasyonel" },
+                { name: "Blockchain Uzmanı ve Geliştiricisi", reason: "Güvenli, şifreli sistemler geliştirme ve uygulama.", category: "Mühendislik & Teknoloji" },
+                { name: "Biyoteknoloji Uzmanı", reason: "Genetik, kimya ve doğa bilimlerinde modern teknoloji entegrasyonu.", category: "Bilim & Sağlık" },
+                { name: "Uzaktan Sağlık Hizmetleri Uzmanı", reason: "Tele-sağlık, YZ destekli teşhis ve hasta danışmanlığı.", category: "Bilim & Sağlık" },
+                { name: "Uzay Endüstrisi Uzmanı", reason: "Uzay teknolojileri geliştirme, uydu sistemleri ve keşif.", category: "Mühendislik & Teknoloji" },
+                { name: "Yenilenebilir Enerji Mühendisi", reason: "Temiz enerji çözümleri geliştirme ve uygulama.", category: "Yeşil Ekonomi" },
+                { name: "Tıbbi Laboratuvar Teknikleri", reason: "Karmaşık laboratuvar analizleri ve yeni tanı yöntemleri geliştirme.", category: "Bilim & Sağlık" },
+                { name: "Kontrol ve Otomasyon Teknolojisi Uzmanı", reason: "Endüstriyel otomasyon sistemleri tasarımı, kurulumu ve bakımı.", category: "Mühendislik & Teknoloji" },
+                { name: "Hibrid ve Elektrikli Taşıtlar Teknolojisi Uzmanı", reason: "Hibrid veya elektrikli araç üretimi, bakımı ve geliştirilmesi.", category: "Mühendislik & Teknoloji" },
+                { name: "Gaz, Doğalgaz ve Tesisatı Teknolojisi Uzmanı", reason: "Altyapı, güvenlik ve enerji verimliliği çözümleri.", category: "Fiziksel & Operasyonel" },
+                { name: "Drone Pilotluğu", reason: "Hava araçları operasyonu, veri toplama ve özel görevler.", category: "Fiziksel & Operasyonel" },
+                { name: "Sentetik Biyoloji Uzmanlığı", reason: "Yeni biyolojik sistemler tasarlama ve mühendislik.", category: "Bilim & Sağlık" },
+                { name: "E-Spor Koçluğu", reason: "İnsan performansı, strateji ve takım yönetimi.", category: "İnsan Odaklı" },
+                { name: "İnsan Kaynakları Uzmanlığı", reason: "İnsan odaklı stratejiler, yetenek yönetimi ve YZ ile destekli süreçler.", category: "İnsan Odaklı" },
+                { name: "Yapay Zeka İş Geliştirme Uzmanı", reason: "YZ ürün ve hizmetlerinin pazarlanması ve yeni iş fırsatları yaratma.", category: "Strateji & Yönetim" },
+                { name: "Yapay Zeka Sağlık Danışmanı/Koçu", reason: "Kişisel sağlık hedeflerinde YZ kullanımı ve rehberlik.", category: "Bilim & Sağlık" },
+                { name: "Derin Öğrenme Uzmanı", reason: "YZ'nin alt alanında uzmanlık, karmaşık algoritmalar geliştirme.", category: "Yapay Zeka & Veri" },
+                { name: "Veri Tabanı Yöneticisi", reason: "Büyük veri sistemleri tasarımı, uygulaması ve yönetimi.", category: "Yapay Zeka & Veri" },
+                { name: "Sanatçı/Yaratıcı Profesyoneller", reason: "YZ'yi araç olarak kullanarak film yapımı, senaryo yazımı, animasyon gibi alanlarda yaratıcılık.", category: "Tasarım & Yaratıcılık" },
+                { name: "Doktorlar", reason: "Karmaşık teşhis, tedavi planlama, hasta iletişimi ve empati.", category: "Bilim & Sağlık" },
+                { name: "Sosyal Hizmet Uzmanları", reason: "Empati, insan etkileşimi, karmaşık sosyal sorunlara çözüm üretme.", category: "İnsan Odaklı" },
+                { name: "Hemşireler", reason: "Doğrudan hasta bakımı, empati ve fiziksel müdahale gerektiren görevler.", category: "Bilim & Sağlık" },
+                { name: "Terapistler/Psikologlar", reason: "Duygusal zeka, kişisel danışmanlık ve insan psikolojisi anlayışı.", category: "İnsan Odaklı" },
+                { name: "Yöneticiler (Stratejik)", reason: "Stratejik karar alma, liderlik, insan yönetimi ve müzakere becerileri.", category: "Strateji & Yönetim" },
+                { name: "Ağır Makine ve Tekne Operatörleri", reason: "Karmaşık fiziksel kontrol, değişken ve öngörülemeyen ortamda adaptasyon.", category: "Fiziksel & Operasyonel" },
+                { name: "Tehlikeli Madde Temizleyicileri", reason: "Özel uzmanlık, riskli ve öngörülemeyen fiziksel ortamda manuel müdahale.", category: "Fiziksel & Operasyonel" }
+            ]
+        };
+
+        const accordionData = [
+            {
+                title: "Bireyler İçin Stratejiler",
+                content: "Yaşam boyu öğrenmeyi benimseyin. YZ araçlarını (TensorFlow, PyTorch) online kurslarla öğrenin. Eleştirel düşünme, yaratıcılık ve empati gibi insani yetkinliklerinizi geliştirin. Alanınızdaki uzmanlarla ağ kurun ve teknolojik gelişmeleri yakından takip edin."
+            },
+            {
+                title: "Kurumlar ve İşverenler İçin Stratejiler",
+                content: "Çalışanlarınıza YZ ve kodlama eğitimleri sunun. İş tanımlarını insan-YZ işbirliğini temel alacak şekilde yeniden tasarlayın. Yeniden vasıflandırma (reskilling) ve üst vasıflandırma (upskilling) programlarına yatırım yapın. Şirket içinde sürekli öğrenme kültürünü teşvik edin."
+            },
+            {
+                title: "Hükümetler ve Politika Yapıcılar İçin Stratejiler",
+                content: "Eğitim müfredatına YZ, veri bilimi ve dijital okuryazarlık derslerini entegre edin. İşgücü geçiş sürecini desteklemek için sosyal güvenlik ağlarını güçlendirin. İşverenleri eğitim vermeye teşvik edecek politikalar geliştirin. Ulusal YZ stratejileri oluşturarak teknolojik adaptasyonu hızlandırın."
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const riskChartCtx = document.getElementById('riskChart').getContext('2d');
+            new Chart(riskChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['OECD Ortalaması', 'Türkiye Tahmini'],
+                    datasets: [{
+                        label: 'Otomasyon Riski Altındaki İş Oranı',
+                        data: [27, 4],
+                        backgroundColor: [
+                            'rgba(245, 166, 35, 0.6)',
+                            'rgba(74, 144, 226, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(245, 166, 35, 1)',
+                            'rgba(74, 144, 226, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: %${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '%' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const jobsGrid = document.getElementById('jobs-grid');
+            const searchInput = document.getElementById('search-input');
+            const riskTab = document.getElementById('risk-tab');
+            const safeTab = document.getElementById('safe-tab');
+            const categoryFiltersContainer = document.getElementById('category-filters');
+            
+            let currentTab = 'risk';
+            let activeCategory = 'all';
+
+            const getUniqueCategories = (jobs) => {
+                const categories = jobs.map(job => job.category);
+                return ['Tümü', ...new Set(categories)];
+            };
+
+            const renderJobs = (jobs) => {
+                jobsGrid.innerHTML = '';
+                const searchTerm = searchInput.value.toLowerCase();
+                
+                const filteredJobs = jobs.filter(job => 
+                    (job.name.toLowerCase().includes(searchTerm)) &&
+                    (activeCategory === 'all' || job.category === activeCategory)
+                );
+
+                if(filteredJobs.length === 0) {
+                    jobsGrid.innerHTML = `<p class="col-span-full text-center text-gray-500">Arama kriterlerinize uygun meslek bulunamadı.</p>`;
+                    return;
+                }
+
+                filteredJobs.forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = `job-card bg-white p-5 rounded-xl shadow-md border-l-4 ${currentTab === 'risk' ? 'border-amber-500' : 'border-blue-500'}`;
+                    card.innerHTML = `
+                        <h4 class="font-bold text-lg">${job.name}</h4>
+                        <div class="details mt-3 pt-3 border-t border-gray-200">
+                            <p class="text-sm text-gray-600">${job.reason}</p>
+                        </div>
+                    `;
+                    jobsGrid.appendChild(card);
+
+                    card.addEventListener('click', () => {
+                        card.querySelector('.details').classList.toggle('open');
+                    });
+                });
+            };
+
+            const renderCategoryFilters = (categories) => {
+                categoryFiltersContainer.innerHTML = '';
+                categories.forEach(category => {
+                    const button = document.createElement('button');
+                    button.textContent = category;
+                    button.className = 'px-3 py-1.5 text-sm font-medium rounded-full transition';
+                    button.dataset.category = category;
+
+                    if ((category === 'Tümü' && activeCategory === 'all') || category === activeCategory) {
+                         button.className += ' bg-gray-800 text-white';
+                    } else {
+                         button.className += ' bg-gray-200 text-gray-700 hover:bg-gray-300';
+                    }
+                    
+                    button.addEventListener('click', () => {
+                        activeCategory = category === 'Tümü' ? 'all' : category;
+                        updateView();
+                    });
+                    categoryFiltersContainer.appendChild(button);
+                });
+            };
+            
+            const updateView = () => {
+                const jobs = jobsData[currentTab];
+                const categories = getUniqueCategories(jobs);
+                renderCategoryFilters(categories);
+                renderJobs(jobs);
+            };
+
+            const switchTab = (tab) => {
+                currentTab = tab;
+                activeCategory = 'all';
+                searchInput.value = '';
+
+                if (tab === 'risk') {
+                    riskTab.classList.add('active');
+                    safeTab.classList.remove('active');
+                    searchInput.placeholder = "Risk altındaki meslekleri ara...";
+                } else {
+                    safeTab.classList.add('active');
+                    riskTab.classList.remove('active');
+                    searchInput.placeholder = "Geleceği parlak meslekleri ara...";
+                }
+                updateView();
+            };
+
+            riskTab.addEventListener('click', () => switchTab('risk'));
+            safeTab.addEventListener('click', () => switchTab('safe'));
+            searchInput.addEventListener('input', () => renderJobs(jobsData[currentTab]));
+
+            const accordionContainer = document.getElementById('accordion-container');
+            accordionData.forEach((item, index) => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'bg-white rounded-xl shadow-md overflow-hidden';
+                accordionItem.innerHTML = `
+                    <button class="w-full text-left p-5 flex justify-between items-center font-semibold text-lg hover:bg-gray-50 transition">
+                        <span>${item.title}</span>
+                        <span class="transform transition-transform duration-300">+</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-gray-600">
+                        <p>${item.content}</p>
+                    </div>
+                `;
+                accordionContainer.appendChild(accordionItem);
+
+                const button = accordionItem.querySelector('button');
+                const content = accordionItem.querySelector('.accordion-content');
+                const icon = button.querySelector('span:last-child');
+
+                button.addEventListener('click', () => {
+                    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+                    if (isOpen) {
+                        content.style.maxHeight = '0px';
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(45deg)';
+                    }
+                });
+            });
+
+            switchTab('risk');
+        });
+    </script>
+</body>
+</html>
