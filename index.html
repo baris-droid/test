@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapay Genel Zeka Zaman Çizelgesi: İnteraktif Bir Analiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Muted Accents -->
+    <!-- Application Structure Plan: A thematic, single-page scrollytelling dashboard. The user starts with the main question ("When?"), explores the timeline predictions via an interactive chart, then delves into the "why" (accelerators vs. roadblocks) through interactive cards. Contextual sections ("What is AGI?") and consequences ("Impact") are strategically placed to support the narrative flow. This structure prioritizes user discovery and understanding over a linear report summary, making the complex topic digestible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Expert timeline predictions (Table 1). Goal: Compare. Viz: Interactive horizontal bar chart (Chart.js). Interaction: Click bars to show detailed info. Justification: Visually compares diverse date ranges and allows drill-down without clutter.
+        - Report Info: Arguments for short/long timelines (Table 3). Goal: Organize/Explain. Viz: Two sets of interactive cards (HTML/CSS/JS). Interaction: Click to expand/collapse. Justification: Breaks down complex arguments into manageable, explorable chunks.
+        - Report Info: AGI vs. Narrow AI (Table 2). Goal: Define/Inform. Viz: Styled HTML table with Unicode icons. Interaction: None. Justification: Best for direct, clear comparison.
+        - Report Info: Socio-economic impacts. Goal: Inform. Viz: Icon-based grid (HTML/Tailwind). Interaction: Hover effects. Justification: High-level, scannable summary of consequences.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7; /* Warm neutral background */
+            color: #404040;
+        }
+        .nav-link {
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: #D97706; /* Amber-600 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 500px;
+            max-height: 70vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .info-card {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .info-card.active {
+             background-color: #FEF3C7; /* Amber-100 */
+        }
+        .content-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+        }
+        .content-panel.open {
+            max-height: 500px; /* Adjust as needed */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-stone-200">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-amber-700">YGZ Ufukları</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#tahminler" class="nav-link text-stone-600 font-medium">Tahminler</a>
+                <a href="#faktorler" class="nav-link text-stone-600 font-medium">Faktörler</a>
+                <a href="#tanim" class="nav-link text-stone-600 font-medium">YGZ Nedir?</a>
+                <a href="#etkiler" class="nav-link text-stone-600 font-medium">Etkiler</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-white border border-stone-300 rounded-md p-2 text-stone-700">
+                    <option value="#tahminler">Tahminler</option>
+                    <option value="#faktorler">Faktörler</option>
+                    <option value="#tanim">YGZ Nedir?</option>
+                    <option value="#etkiler">Etkiler</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="text-center py-20 px-6 bg-amber-50">
+            <h2 class="text-4xl md:text-6xl font-extrabold text-stone-800 mb-4">Yapay Genel Zeka Ne Zaman Gelecek?</h2>
+            <p class="max-w-3xl mx-auto text-lg text-stone-600">
+                Uzmanlar, insan zekasını yakalayacak veya aşacak makinelerin ne zaman ortaya çıkacağı konusunda ikiye bölünmüş durumda. Bu interaktif analiz, farklı tahminleri, bu tahminlerin arkasındaki nedenleri ve YGZ'nin potansiyel geleceğini keşfediyor.
+            </p>
+        </section>
+
+        <section id="tahminler" class="py-16 sm:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-stone-800">Büyük Tartışma: Zaman Çizelgesi Tahminleri</h3>
+                    <p class="mt-2 text-md text-stone-600 max-w-2xl mx-auto">
+                        Yapay zeka araştırmacılarının ortalama tahmini 2040'ları işaret ederken, teknoloji liderleri çok daha erken tarihler öngörüyor. Grafikteki çubuklara tıklayarak farklı uzmanların ve grupların tahminlerini ve gerekçelerini inceleyin.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                    <div class="lg:col-span-2">
+                        <div class="chart-container bg-white p-4 rounded-lg shadow-md">
+                            <canvas id="timelineChart"></canvas>
+                        </div>
+                    </div>
+                    <div id="prediction-info" class="bg-white p-6 rounded-lg shadow-md min-h-[300px] sticky top-24">
+                        <h4 id="info-title" class="text-xl font-bold text-amber-700 mb-2">Bir Tahmin Seçin</h4>
+                        <p id="info-body" class="text-stone-600">Grafikten bir çubuğa tıklayarak o tahminle ilgili detaylı bilgiyi burada görüntüleyebilirsiniz.</p>
+                        <div id="info-details" class="mt-4 text-sm text-stone-500"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="faktorler" class="py-16 sm:py-24 bg-stone-100">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-stone-800">Neden Şimdi? Hızlandıran ve Yavaşlatan Faktörler</h3>
+                    <p class="mt-2 text-md text-stone-600 max-w-2xl mx-auto">
+                        YGZ'ye giden yol, hem ilerlemeyi tetikleyen güçlü itici güçlerle hem de önemli engellerle dolu. Aşağıdaki kartlara tıklayarak her iki tarafın argümanlarını keşfedin.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div>
+                        <h4 class="text-2xl font-semibold text-green-700 mb-6 text-center">🚀 Hızlandıran Faktörler</h4>
+                        <div id="accelerators-container" class="space-y-4">
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-semibold text-red-700 mb-6 text-center">🐌 Yavaşlatan Faktörler</h4>
+                        <div id="decelerators-container" class="space-y-4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tanim" class="py-16 sm:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-stone-800">Peki, YGZ Tam Olarak Nedir?</h3>
+                    <p class="mt-2 text-md text-stone-600 max-w-2xl mx-auto">
+                        YGZ, bugün kullandığımız "Dar Yapay Zeka"dan temelden farklıdır. Aşağıdaki tablo, aralarındaki temel farkları özetlemektedir.
+                    </p>
+                </div>
+                <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-stone-50">
+                            <tr>
+                                <th class="p-4 font-semibold text-stone-700">Özellik</th>
+                                <th class="p-4 font-semibold text-stone-700">Dar Yapay Zeka (Mevcut)</th>
+                                <th class="p-4 font-semibold text-stone-700">Yapay Genel Zeka (Hedef)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-table-body" class="divide-y divide-stone-200">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="etkiler" class="py-16 sm:py-24 bg-amber-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-stone-800">Ufuktaki Değişim: Potansiyel Etkiler</h3>
+                    <p class="mt-2 text-md text-stone-600 max-w-2xl mx-auto">
+                        YGZ'nin gelişi, toplumun her alanında köklü dönüşümlere yol açma potansiyeli taşıyor.
+                    </p>
+                </div>
+                <div id="impacts-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-stone-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 YGZ Ufukları İnteraktif Raporu.</p>
+            <p class="text-sm text-stone-400 mt-2">Bu uygulama, "Yapay Genel Zeka Zaman Çizelgesi" raporundaki veriler temel alınarak oluşturulmuştur.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const predictionData = [
+                { group: 'İyimserler', label: 'Elon Musk', year: 2026, text: 'Yapay zekanın en zeki insanlardan daha akıllı hale gelmesini 2026 yılına kadar bekliyor.', details: 'Tesla ve xAI\'ın başındaki isim olarak, yapay zeka gelişiminin hızına dair oldukça iyimser bir bakış açısına sahip.' },
+                { group: 'İyimserler', label: 'Dario Amodei', year: 2026, text: 'Anthropic CEO\'su, "güçlü yapay zeka"yı 2026 yılına kadar bekliyor.', details: 'Bu durumu "veri merkezindeki dahiler ülkesi" olarak tanımlıyor ve güvenlik odaklı bir yaklaşımla ilerlediklerini belirtiyor.' },
+                { group: 'İyimserler', label: 'Ben Goertzel', year: 2027, text: 'SingularityNET CEO\'su, YGZ\'nin 2027 gibi erken bir tarihte ortaya çıkabileceğini tahmin ediyor.', details: 'Merkeziyetsiz yapay zeka platformları üzerine yaptığı çalışmalarla tanınıyor.' },
+                { group: 'İyimserler', label: 'Jensen Huang', year: 2029, text: 'Nvidia CEO\'su, 5 yıl içinde (2029\'a kadar) yapay zekanın herhangi bir testte insan performansını yakalayacağını tahmin ediyor.', details: 'Yapay zeka donanımındaki liderlikleri, bu tahminin temelini oluşturuyor.' },
+                { group: 'İyimserler', label: 'Ray Kurzweil', year: 2029, text: 'Fütürist Ray Kurzweil, uzun süredir insan düzeyinde zeka için 2029 yılını hedefliyor.', details: 'Teknolojik tekillik ve üstel büyüme yasaları üzerine yaptığı çalışmalarla biliniyor.' },
+                { group: 'Tahmin Piyasaları', label: 'Metaculus', year: 2031, text: 'Topluluk tahmin platformu Metaculus, YGZ için %50 olasılıkla 2031 yılını gösteriyor.', details: 'Bu, binlerce bireysel tahmincinin ortalamasıdır ve son yıllarda önemli ölçüde öne çekilmiştir.' },
+                { group: 'İyimserler', label: 'Demis Hassabis', year: 2032.5, text: 'Google DeepMind CEO\'su, YGZ\'nin 5-10 yıl içinde (ortalama 2032.5) ortaya çıkabileceğini belirtiyor.', details: 'Onun tanımı, "sadece sorunları çözmekle kalmayıp onları icat eden" daha geniş yeteneklere sahip sistemleri içeriyor.' },
+                { group: 'Araştırmacılar', label: 'Uzman Anketi (2023)', year: 2040, text: '2.778 yapay zeka araştırmacısının katıldığı bir anket, YGZ\'nin 2040 yılına kadar ortaya çıkacağını tahmin ediyor.', details: 'Bu, sadece birkaç yıl önceki 2060 tahminlerine göre önemli bir hızlanmayı temsil ediyor.' },
+                { group: 'Şüpheciler', label: 'Yann LeCun', year: 2055, text: 'Meta Baş Yapay Zeka Bilimcisi, YGZ\'nin "on yıllar uzakta" olduğuna inanıyor.', details: 'Mevcut Büyük Dil Modeli yaklaşımlarının YGZ\'ye giden bir yol olduğu konusunda şüpheci ve mimaride temel bir değişiklik gerektiğini savunuyor.' },
+                { group: 'Şüpheciler', label: 'Andrew Ng', year: 2065, text: 'Google Brain kurucusu, YGZ\'nin hala "on yıllar, hatta daha uzun bir süre uzakta" olduğunu tahmin ediyor.', details: 'Mevcut teknik sorunların ötesinde önemli bilimsel atılımlar gerektiğini vurguluyor.' },
+                { group: 'Şüpheciler', label: 'K. Amerikalı Araştırmacılar', year: 2096, text: 'Anketlere göre Kuzey Amerikalı araştırmacılar, YGZ\'yi ortalama 74 yıl içinde (yaklaşık 2096) bekliyor.', details: 'Bu, Asyalı meslektaşlarının 30 yıllık tahminine kıyasla daha temkinli bir görüşü yansıtıyor.' },
+            ];
+
+            const factorsData = {
+                accelerators: [
+                    { title: 'Algoritmik Atılımlar', content: 'Transformer mimarisi ve GPT-4 gibi Büyük Dil Modelleri (BDM\'ler), yapay zekanın dil, mantık ve kodlama gibi alanlarda daha önce görülmemiş yetenekler sergilemesini sağladı. Bu, "ölçeklendirme hipotezini" (daha fazla veri ve hesaplama gücü = daha fazla zeka) güçlendiriyor.' },
+                    { title: 'Üstel Hesaplama Gücü', content: 'GPU\'lar gibi özel donanımların gelişimi ve genel hesaplama kapasitesindeki artış, giderek daha büyük ve karmaşık modellerin eğitilmesine olanak tanıyor. Bu, yapay zeka ilerlemesinin temel motorudur.' },
+                    { title: 'Otonom Sistemler ve Çok Modluluk', content: 'Yapay zeka artık sadece metin değil, görüntü, ses ve videoyu da anlıyor. Bu çok modlu yaklaşım ve otonom görevleri yerine getirebilen "ajanlar", dünyaya daha bütünsel bir bakış açısı kazandırarak YGZ\'ye yaklaşıyor.' },
+                    { title: 'Gelişmiş Kıyaslamalar', content: 'ARC-AGI gibi yeni ve zorlu testler, yapay zeka modellerinin genel zeka yeteneklerini daha iyi ölçmemizi sağlıyor. Modellerin bu testlerde hızla ilerlemesi, gelişimin somut bir göstergesi olarak görülüyor.' }
+                ],
+                decelerators: [
+                    { title: 'Temel Teknik Engeller', content: 'Mevcut modeller hala sağduyu, duygusal zeka, gerçek dünya anlayışı ve sağlam genelleme gibi insan bilişinin temel yönlerinde zorlanıyor. Bu boşlukları kapatmak için mimaride temel atılımlar gerekebilir.' },
+                    { title: 'Kaynak Kısıtlamaları', content: 'Büyük yapay zeka modellerini eğitmek ve çalıştırmak, muazzam miktarda enerji ve finansal kaynak gerektiriyor. Bu durum, sürdürülebilirlik ve ölçeklenebilirlik sorunları yaratarak ilerlemeyi yavaşlatabilir.' },
+                    { title: 'Etik ve Güvenlik Sorunları', content: 'YGZ\'nin kontrolü, insan değerleriyle uyumu ve potansiyel varoluşsal riskleri, çözülmesi gereken en zorlu sorunlardır. "Kontrol sorunu" çözülmeden YGZ\'yi geliştirmek, felaketle sonuçlanabilir.' },
+                    { title: 'Yönetişim ve Düzenleme', content: 'Teknolojinin hızı, yasal ve düzenleyici çerçevelerin hızını aşıyor. Jeopolitik rekabet ("yapay zeka silahlanma yarışı") ve küresel bir fikir birliğinin olmaması, sorumlu gelişimi zorlaştırıyor.' }
+                ]
+            };
+            
+            const comparisonData = [
+                { feature: '🧠 Zeka Kapsamı', narrow: 'Belirli, tek bir görevde uzmanlaşmıştır (örn. satranç oynamak).', agi: 'Herhangi bir entelektüel görevi öğrenebilen genel, insan benzeri zeka.' },
+                { feature: '🎓 Öğrenme Yeteneği', narrow: 'Sadece eğitildiği verilerle sınırlıdır.', agi: 'Otonom olarak öğrenir ve bilgiyi yeni, görülmemiş alanlara aktarır.' },
+                { feature: '⚙️ Uyarlanabilirlik', narrow: 'Yeni durumlara uyum sağlamakta zorlanır.', agi: 'Son derece uyarlanabilir, dinamik ortamlarda etkili bir şekilde çalışır.' },
+                { feature: '🤔 Akıl Yürütme', narrow: 'İstatistiksel örüntüleri tanır.', agi: 'Gerçek anlayış, sağduyu ve nedensellik ile akıl yürütür.' },
+                { feature: '🌍 Özerklik', narrow: 'Genellikle insan denetimi gerektirir.', agi: 'Sürekli insan müdahalesi olmadan kendi kendine karar verir ve hareket eder.' }
+            ];
+
+            const impactsData = [
+                { icon: '💼', title: 'İş Gücü Dönüşümü', text: 'Birçok bilişsel ve fiziksel işin otomasyonu, kitlesel iş kayıplarına ve yeni iş rollerinin ortaya çıkmasına yol açabilir.' },
+                { icon: '📈', title: 'Ekonomik Büyüme ve Eşitsizlik', text: 'Benzeri görülmemiş üretkenlik artışları vaat ederken, faydaların adil dağıtılmaması durumunda servet eşitsizliğini derinleştirebilir.' },
+                { icon: '🌍', title: 'Jeopolitik Değişimler', text: 'YGZ\'yi ilk geliştiren ulus veya kuruluş, önemli bir stratejik avantaj elde edebilir ve küresel güç dengelerini değiştirebilir.' },
+                { icon: '🛡️', title: 'Sorumlu Gelişim Zorunluluğu', text: 'YGZ\'nin insanlığa fayda sağlaması için değer uyumu, güvenlik ve etik konularına öncelik veren proaktif yönetişim çerçeveleri kritik öneme sahiptir.' }
+            ];
+
+
+            const infoTitle = document.getElementById('info-title');
+            const infoBody = document.getElementById('info-body');
+            const infoDetails = document.getElementById('info-details');
+            
+            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+            const timelineChart = new Chart(timelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: predictionData.map(d => d.label),
+                    datasets: [{
+                        label: 'YGZ Tahmin Yılı',
+                        data: predictionData.map(d => d.year),
+                        backgroundColor: predictionData.map(d => {
+                            if (d.group === 'İyimserler') return 'rgba(234, 179, 8, 0.6)'; // Amber 500
+                            if (d.group === 'Şüpheciler') return 'rgba(220, 38, 38, 0.6)'; // Red 600
+                            if (d.group === 'Tahmin Piyasaları') return 'rgba(22, 163, 74, 0.6)'; // Green 600
+                            return 'rgba(107, 114, 128, 0.6)'; // Gray 500
+                        }),
+                        borderColor: predictionData.map(d => {
+                            if (d.group === 'İyimserler') return 'rgb(234, 179, 8)';
+                            if (d.group === 'Şüpheciler') return 'rgb(220, 38, 38)';
+                             if (d.group === 'Tahmin Piyasaları') return 'rgb(22, 163, 74)';
+                            return 'rgb(107, 114, 128)';
+                        }),
+                        borderWidth: 1,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.7,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.raw} yılı`;
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Uzman ve Grup Tahminleri (Yıl)',
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            },
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: false,
+                            min: 2025,
+                            max: 2100,
+                            title: {
+                                display: true,
+                                text: 'Tahmin Edilen Yıl'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                autoSkip: false,
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const data = predictionData[index];
+                            infoTitle.textContent = data.label;
+                            infoBody.textContent = data.text;
+                            infoDetails.innerHTML = `
+                                <span class="font-semibold">Grup:</span> ${data.group}<br>
+                                <span class="font-semibold">Detay:</span> ${data.details}
+                            `;
+                        }
+                    }
+                }
+            });
+
+            function createInfoCard(item, containerId) {
+                const container = document.getElementById(containerId);
+                const cardWrapper = document.createElement('div');
+                const card = document.createElement('div');
+                card.className = 'info-card bg-white p-4 rounded-lg shadow-sm border border-stone-200';
+                card.innerHTML = `<h5 class="font-semibold text-lg">${item.title}</h5>`;
+                
+                const content = document.createElement('div');
+                content.className = 'content-panel p-4 pt-0 text-stone-600';
+                content.innerHTML = `<p>${item.content}</p>`;
+
+                cardWrapper.appendChild(card);
+                cardWrapper.appendChild(content);
+                container.appendChild(cardWrapper);
+
+                card.addEventListener('click', () => {
+                    const allCardsInContainer = document.querySelectorAll(`#${containerId} .info-card`);
+                    const allContentsInContainer = document.querySelectorAll(`#${containerId} .content-panel`);
+
+                    const wasOpen = content.classList.contains('open');
+
+                    allCardsInContainer.forEach(c => c.classList.remove('active'));
+                    allContentsInContainer.forEach(p => {
+                        p.classList.remove('open');
+                        p.style.paddingTop = '0';
+                        p.style.paddingBottom = '0';
+                    });
+
+                    if (!wasOpen) {
+                        card.classList.add('active');
+                        content.classList.add('open');
+                        content.style.paddingTop = '1rem';
+                        content.style.paddingBottom = '1rem';
+                    }
+                });
+            }
+
+            factorsData.accelerators.forEach(item => createInfoCard(item, 'accelerators-container'));
+            factorsData.decelerators.forEach(item => createInfoCard(item, 'decelerators-container'));
+
+            const comparisonTableBody = document.getElementById('comparison-table-body');
+            comparisonData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-amber-50';
+                row.innerHTML = `
+                    <td class="p-4 font-medium">${item.feature}</td>
+                    <td class="p-4 text-stone-600">${item.narrow}</td>
+                    <td class="p-4 text-stone-600">${item.agi}</td>
+                `;
+                comparisonTableBody.appendChild(row);
+            });
+
+            const impactsContainer = document.getElementById('impacts-container');
+            impactsData.forEach(item => {
+                const impactCard = document.createElement('div');
+                impactCard.className = 'bg-white p-6 rounded-lg shadow-md text-center transition-transform hover:scale-105';
+                impactCard.innerHTML = `
+                    <div class="text-5xl mb-4">${item.icon}</div>
+                    <h5 class="text-xl font-bold mb-2 text-stone-800">${item.title}</h5>
+                    <p class="text-stone-600">${item.text}</p>
+                `;
+                impactsContainer.appendChild(impactCard);
+            });
+            
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                const targetId = e.target.value;
+                document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
